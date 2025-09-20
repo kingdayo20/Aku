@@ -8,6 +8,7 @@ import {
   AlertCircle,
   CheckCircle,
   ChevronRight,
+  Zap,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,8 @@ interface ClaimDetailViewProps {
     originalDenial: string;
     eobSnippet: string;
   };
+  showAIAnalysis?: boolean;
+  isRunningAI?: boolean;
   aiAnalysis?: {
     reason: string;
     source: string;
@@ -59,6 +62,8 @@ const ClaimDetailView: React.FC<ClaimDetailViewProps> = ({
     originalDenial: "CPT 99213 requires prior authorization",
     eobSnippet: "EOB_12345.pdf",
   },
+  showAIAnalysis = false,
+  isRunningAI = false,
   aiAnalysis = {
     reason: "Missing Prior Authorization",
     source:
@@ -68,31 +73,10 @@ const ClaimDetailView: React.FC<ClaimDetailViewProps> = ({
       "89% of similar denials were fixed via REBILL after resubmission with auth.",
   },
   recommendedAction = "Rebill",
-  epicReadyNote = "Note: Claim #12345 denied due to missing prior authorization per TMHP Policy §4.2.1. Verified patient eligibility; authorization was not obtained prior to service. Resubmitting with supporting documentation (auth #TX-MED-2025-00432). Requested: Rebill.\\n\\nAudit Trail: AI classified on 04/15/2025. Source: TMHP EOB dated 04/12/2025.",
+  epicReadyNote = "Note: Claim #12345 denied due to missing prior authorization per TMHP Policy §4.2.1. Verified patient eligibility; authorization was not obtained prior to service. Resubmitting with supporting documentation (auth #TX-MED-2025-00432). Requested: Rebill.\\\\n\\\\nAudit Trail: AI classified on 04/15/2025. Source: TMHP EOB dated 04/12/2025.",
 }) => {
-  const [selectedAction, setSelectedAction] =
-    useState<string>(recommendedAction);
-  const [note, setNote] = useState<string>(epicReadyNote);
-  const [copied, setCopied] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>("claim");
-
-  const handleCopyNote = () => {
-    navigator.clipboard.writeText(note);
-    setCopied(true);
-    toast({
-      title: "Note copied to clipboard",
-      description: "The Epic-ready note has been copied to your clipboard.",
-    });
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleResetNote = () => {
-    setNote(epicReadyNote);
-    toast({
-      title: "Note reset",
-      description: "The note has been reset to the AI-generated version.",
-    });
-  };
+  const [activeTab, setActiveTab] = useState("claim");
+  const [copied, setCopied] = useState(false);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -124,14 +108,30 @@ const ClaimDetailView: React.FC<ClaimDetailViewProps> = ({
 
   const getPayerDisplayName = () => {
     if (claim.payerAdmin) {
-      return `${claim.payerAdmin} (${claim.payer})`;
+      return `${claim.payerAdmin.toUpperCase()} (${claim.payer})`;
     }
     return claim.payer;
   };
 
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleRunAIAnalysis = () => {
+    setIsRunningAI(true);
+    // Simulate AI analysis and auto-switch to analysis tab
+    setTimeout(() => {
+      setIsRunningAI(false);
+      setShowAIAnalysis(true);
+      setActiveTab("analysis"); // Auto-switch to analysis tab
+    }, 4000);
+  };
+
   return (
     <motion.div
-      className="bg-white rounded-xl shadow-lg p-6 max-w-5xl mx-auto"
+      className="bg-white rounded-xl shadow-lg p-6 max-w-full mx-auto"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -141,10 +141,18 @@ const ClaimDetailView: React.FC<ClaimDetailViewProps> = ({
           <TabsTrigger value="claim" className="text-sm font-medium">
             Claim Details
           </TabsTrigger>
-          <TabsTrigger value="analysis" className="text-sm font-medium">
+          <TabsTrigger 
+            value="analysis" 
+            className="text-sm font-medium"
+            disabled={!showAIAnalysis && !isRunningAI}
+          >
             AI Analysis
           </TabsTrigger>
-          <TabsTrigger value="action" className="text-sm font-medium">
+          <TabsTrigger 
+            value="action" 
+            className="text-sm font-medium"
+            disabled={!showAIAnalysis}
+          >
             Action & Notes
           </TabsTrigger>
         </TabsList>
@@ -164,7 +172,7 @@ const ClaimDetailView: React.FC<ClaimDetailViewProps> = ({
                     </Badge>
                     {claim.payerAdmin && (
                       <span className="text-xs text-white/80">
-                        Administrator: {claim.payerAdmin}
+                        Administrator: {claim.payerAdmin.toUpperCase()}
                       </span>
                     )}
                   </div>
@@ -203,7 +211,7 @@ const ClaimDetailView: React.FC<ClaimDetailViewProps> = ({
                     <div className="flex justify-between">
                       <span className="text-gray-500">Administrator:</span>
                       <span className="font-medium">
-                        {claim.payerAdmin || "N/A"}
+                        {claim.payerAdmin?.toUpperCase() || "N/A"}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -233,66 +241,98 @@ const ClaimDetailView: React.FC<ClaimDetailViewProps> = ({
         <TabsContent value="analysis">
           <motion.div variants={itemVariants}>
             <Card>
-              <CardHeader className="bg-[#0F2C5D] text-white rounded-t-xl">
-                <CardTitle className="text-xl">AI Analysis</CardTitle>
+              <CardHeader className="bg-gradient-to-r from-[#00A896] to-[#0F2C5D] text-white rounded-t-xl">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Zap className="h-6 w-6" />
+                  AI Analysis Results
+                </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
-                <motion.div className="space-y-6" variants={containerVariants}>
-                  <motion.div
-                    variants={itemVariants}
-                    className="flex flex-col gap-2"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-500">Denial Reason:</span>
-                      <span className="font-medium text-[#0F2C5D]">
-                        {aiAnalysis.reason}
-                      </span>
-                    </div>
-                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <p className="text-sm italic">{aiAnalysis.source}</p>
-                    </div>
-                  </motion.div>
-
-                  <motion.div variants={itemVariants} className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-500">AI Confidence:</span>
-                      <span className="font-bold">
-                        {aiAnalysis.confidence}%
-                      </span>
-                    </div>
-                    <div className="relative pt-1">
+                {isRunningAI ? (
+                  <div className="flex flex-col items-center justify-center py-12">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                      className="mb-4"
+                    >
+                      <Zap className="h-12 w-12 text-[#00A896]" />
+                    </motion.div>
+                    <h3 className="text-lg font-medium text-[#0F2C5D] mb-2">
+                      AI Analysis in Progress
+                    </h3>
+                    <p className="text-gray-600 text-center">
+                      Analyzing claim patterns, policy references, and historical data...
+                    </p>
+                    <div className="w-64 h-2 bg-gray-200 rounded-full mt-4 overflow-hidden">
                       <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${aiAnalysis.confidence}%` }}
-                        transition={{ duration: 1, ease: "easeOut" }}
-                      >
-                        <Progress
-                          value={aiAnalysis.confidence}
-                          className="h-2"
-                        />
-                      </motion.div>
+                        className="h-full bg-gradient-to-r from-[#00A896] to-[#0F2C5D]"
+                        initial={{ width: "0%" }}
+                        animate={{ width: "100%" }}
+                        transition={{ duration: 2, ease: "easeInOut" }}
+                      />
                     </div>
-                  </motion.div>
-
+                  </div>
+                ) : showAIAnalysis ? (
                   <motion.div
-                    variants={itemVariants}
-                    className="p-4 bg-blue-50 rounded-lg border border-blue-100"
+                    className="space-y-6"
+                    variants={containerVariants}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="mt-1">
-                        <AlertCircle size={18} className="text-blue-500" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-blue-700 mb-1">
-                          Historical Pattern
-                        </h4>
-                        <p className="text-sm text-blue-600">
-                          {aiAnalysis.historicalPattern}
+                    <motion.div variants={itemVariants}>
+                      <h3 className="text-lg font-semibold text-[#0F2C5D] mb-3">
+                        Denial Analysis
+                      </h3>
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <p className="text-blue-800 font-medium">
+                          {aiAnalysis.reason}
                         </p>
                       </div>
-                    </div>
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <h3 className="text-lg font-semibold text-[#0F2C5D] mb-3">
+                        Policy Source
+                      </h3>
+                      <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-[#00A896]">
+                        <p className="text-gray-700 italic">{aiAnalysis.source}</p>
+                      </div>
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <h3 className="text-lg font-semibold text-[#0F2C5D] mb-3">
+                        Confidence Score
+                      </h3>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1 bg-gray-200 rounded-full h-3">
+                          <motion.div
+                            className="bg-gradient-to-r from-[#00A896] to-[#0F2C5D] h-3 rounded-full"
+                            initial={{ width: 0 }}
+                            animate={{ width: `${aiAnalysis.confidence}%` }}
+                            transition={{ duration: 1, delay: 0.5 }}
+                          />
+                        </div>
+                        <span className="text-2xl font-bold text-[#0F2C5D]">
+                          {aiAnalysis.confidence}%
+                        </span>
+                      </div>
+                    </motion.div>
+
+                    <motion.div variants={itemVariants}>
+                      <h3 className="text-lg font-semibold text-[#0F2C5D] mb-3">
+                        Historical Pattern
+                      </h3>
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <p className="text-green-800">{aiAnalysis.historicalPattern}</p>
+                      </div>
+                    </motion.div>
                   </motion.div>
-                </motion.div>
+                ) : (
+                  <div className="text-center py-12">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
+                    <p className="text-gray-500">
+                      Click "Run AI Analysis" to analyze this claim
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
@@ -302,170 +342,50 @@ const ClaimDetailView: React.FC<ClaimDetailViewProps> = ({
           <motion.div variants={itemVariants}>
             <Card>
               <CardHeader className="bg-[#0F2C5D] text-white rounded-t-xl">
-                <CardTitle className="text-xl">Recommended Action</CardTitle>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <CheckCircle className="h-6 w-6" />
+                  Recommended Action & Notes
+                </CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
-                <motion.div className="space-y-8" variants={containerVariants}>
+                <motion.div className="space-y-6" variants={containerVariants}>
                   <motion.div variants={itemVariants}>
-                    <RadioGroup
-                      defaultValue={selectedAction}
-                      onValueChange={setSelectedAction}
-                      className="grid grid-cols-2 md:grid-cols-4 gap-4"
-                    >
-                      <div
-                        className={`border rounded-lg p-4 ${selectedAction === "Rebill" ? "border-[#00A896] bg-[#00A896]/10" : "border-gray-200"}`}
-                      >
-                        <RadioGroupItem
-                          value="Rebill"
-                          id="rebill"
-                          className="sr-only"
-                        />
-                        <Label
-                          htmlFor="rebill"
-                          className={`flex flex-col items-center cursor-pointer ${selectedAction === "Rebill" ? "text-[#00A896]" : ""}`}
-                        >
-                          {selectedAction === "Rebill" && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="mb-2"
-                            >
-                              <CheckCircle size={24} />
-                            </motion.div>
-                          )}
-                          <span>Rebill</span>
-                        </Label>
-                      </div>
-
-                      <div
-                        className={`border rounded-lg p-4 ${selectedAction === "Appeal" ? "border-[#00A896] bg-[#00A896]/10" : "border-gray-200"}`}
-                      >
-                        <RadioGroupItem
-                          value="Appeal"
-                          id="appeal"
-                          className="sr-only"
-                        />
-                        <Label
-                          htmlFor="appeal"
-                          className={`flex flex-col items-center cursor-pointer ${selectedAction === "Appeal" ? "text-[#00A896]" : ""}`}
-                        >
-                          {selectedAction === "Appeal" && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="mb-2"
-                            >
-                              <CheckCircle size={24} />
-                            </motion.div>
-                          )}
-                          <span>Appeal</span>
-                        </Label>
-                      </div>
-
-                      <div
-                        className={`border rounded-lg p-4 ${selectedAction === "Write-off" ? "border-[#00A896] bg-[#00A896]/10" : "border-gray-200"}`}
-                      >
-                        <RadioGroupItem
-                          value="Write-off"
-                          id="write-off"
-                          className="sr-only"
-                        />
-                        <Label
-                          htmlFor="write-off"
-                          className={`flex flex-col items-center cursor-pointer ${selectedAction === "Write-off" ? "text-[#00A896]" : ""}`}
-                        >
-                          {selectedAction === "Write-off" && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="mb-2"
-                            >
-                              <CheckCircle size={24} />
-                            </motion.div>
-                          )}
-                          <span>Write-off</span>
-                        </Label>
-                      </div>
-
-                      <div
-                        className={`border rounded-lg p-4 ${selectedAction === "Close" ? "border-[#00A896] bg-[#00A896]/10" : "border-gray-200"}`}
-                      >
-                        <RadioGroupItem
-                          value="Close"
-                          id="close"
-                          className="sr-only"
-                        />
-                        <Label
-                          htmlFor="close"
-                          className={`flex flex-col items-center cursor-pointer ${selectedAction === "Close" ? "text-[#00A896]" : ""}`}
-                        >
-                          {selectedAction === "Close" && (
-                            <motion.div
-                              initial={{ scale: 0 }}
-                              animate={{ scale: 1 }}
-                              className="mb-2"
-                            >
-                              <CheckCircle size={24} />
-                            </motion.div>
-                          )}
-                          <span>Close</span>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </motion.div>
-
-                  <motion.div variants={itemVariants} className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium text-lg">Epic-Ready Note</h3>
-                      <div className="flex gap-2">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleCopyNote}
-                                className="flex items-center gap-1"
-                              >
-                                {copied ? (
-                                  <Check size={16} />
-                                ) : (
-                                  <Copy size={16} />
-                                )}
-                                <span>{copied ? "Copied" : "Copy"}</span>
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Copy note to clipboard</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    </div>
-
-                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                      <Textarea
-                        value={note}
-                        onChange={(e) => setNote(e.target.value)}
-                        className="min-h-[150px] border-none bg-transparent focus-visible:ring-0 p-0"
-                      />
-                    </div>
-
-                    <div className="flex justify-between items-center pt-2">
+                    <h3 className="text-lg font-semibold text-[#0F2C5D] mb-3">
+                      Recommended Action
+                    </h3>
+                    <div className="flex items-center gap-3">
+                      <Badge className="bg-[#00A896] text-white text-lg px-4 py-2">
+                        {recommendedAction}
+                      </Badge>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={handleResetNote}
-                        className="flex items-center gap-1"
+                        className="border-[#00A896] text-[#00A896] hover:bg-[#00A896]/10"
                       >
-                        <Edit size={16} />
-                        <span>Reset to AI</span>
+                        Execute Action
                       </Button>
+                    </div>
+                  </motion.div>
 
-                      <Button className="bg-[#00A896] hover:bg-[#00A896]/90 flex items-center gap-1">
-                        <span>Submit to Epic</span>
-                        <ChevronRight size={16} />
+                  <motion.div variants={itemVariants}>
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-lg font-semibold text-[#0F2C5D]">
+                        Epic-Ready Note
+                      </h3>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleCopy(epicReadyNote)}
+                        className="flex items-center gap-2"
+                      >
+                        <Copy size={16} />
+                        {copied ? "Copied!" : "Copy Note"}
                       </Button>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg border">
+                      <pre className="text-sm text-gray-700 whitespace-pre-wrap font-mono">
+                        {epicReadyNote}
+                      </pre>
                     </div>
                   </motion.div>
                 </motion.div>

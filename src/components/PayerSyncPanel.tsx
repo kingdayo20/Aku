@@ -16,6 +16,7 @@ import {
   CheckCircle,
   AlertCircle,
   XCircle,
+  Clock,
 } from "lucide-react";
 import PayerDropdown from "@/components/PayerDropdown";
 
@@ -27,6 +28,9 @@ interface PayerSyncPanelProps {
     description: string;
     type: "rebill" | "denied" | "appeal";
   }>;
+  onPayerChange?: (payer: string, admin?: string) => void;
+  selectedPayer?: string;
+  selectedAdmin?: string;
 }
 
 const PayerSyncPanel = ({
@@ -37,10 +41,11 @@ const PayerSyncPanel = ({
     { id: "12346", description: "Denied: Missing COB", type: "denied" },
     { id: "12347", description: "Classified as Appeal", type: "appeal" },
   ],
+  onPayerChange = () => {},
+  selectedPayer = "",
+  selectedAdmin = "",
 }: PayerSyncPanelProps) => {
   const [isSyncing, setIsSyncing] = useState(false);
-  const [selectedPayer, setSelectedPayer] = useState("medicaid");
-  const [selectedAdmin, setSelectedAdmin] = useState("tmhp");
 
   const handleSync = () => {
     setIsSyncing(true);
@@ -51,8 +56,8 @@ const PayerSyncPanel = ({
   };
 
   const handlePayerChange = (payer: string, admin?: string) => {
-    setSelectedPayer(payer);
-    setSelectedAdmin(admin || "");
+    // Notify parent component (home.tsx) about payer change
+    onPayerChange(payer, admin);
   };
 
   const getStatusIcon = () => {
@@ -60,9 +65,9 @@ const PayerSyncPanel = ({
       case "active":
         return <CheckCircle className="h-5 w-5 text-green-500" />;
       case "pending":
-        return <AlertCircle className="h-5 w-5 text-amber-500" />;
+        return <Clock className="h-5 w-5 text-yellow-500" />;
       case "error":
-        return <XCircle className="h-5 w-5 text-red-500" />;
+        return <AlertCircle className="h-5 w-5 text-red-500" />;
       default:
         return <CheckCircle className="h-5 w-5 text-green-500" />;
     }
@@ -71,22 +76,38 @@ const PayerSyncPanel = ({
   const getStatusBadge = () => {
     switch (status) {
       case "active":
-        return <Badge className="bg-green-500">Active</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Active
+          </Badge>
+        );
       case "pending":
-        return <Badge className="bg-amber-500">Pending</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+            Pending
+          </Badge>
+        );
       case "error":
-        return <Badge className="bg-red-500">Error</Badge>;
+        return (
+          <Badge className="bg-red-100 text-red-800 border-red-200">
+            Error
+          </Badge>
+        );
       default:
-        return <Badge className="bg-green-500">Active</Badge>;
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200">
+            Active
+          </Badge>
+        );
     }
   };
 
   const getActivityIcon = (type: string) => {
     switch (type) {
       case "rebill":
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <RefreshCw className="h-4 w-4 text-green-500" />;
       case "denied":
-        return <AlertCircle className="h-4 w-4 text-amber-500" />;
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
       case "appeal":
         return <FileText className="h-4 w-4 text-blue-500" />;
       default:
@@ -165,7 +186,7 @@ const PayerSyncPanel = ({
               </div>
               <div>
                 <h3 className="text-sm font-medium">
-                  {selectedAdmin ? selectedAdmin.toUpperCase() : selectedPayer} Portal Sync
+                  {selectedAdmin ? selectedAdmin.toUpperCase() : selectedPayer.toUpperCase()} Portal Sync
                 </h3>
                 <p className="text-xs text-gray-500">
                   Last synced: {lastSynced}
@@ -177,9 +198,9 @@ const PayerSyncPanel = ({
 
           {/* Recent Activity */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
           >
             <h3 className="text-sm font-medium mb-2">Recent Activity</h3>
             <div className="space-y-2">
@@ -188,14 +209,16 @@ const PayerSyncPanel = ({
                   key={activity.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + index * 0.1 }}
-                  className="flex items-center space-x-2 text-xs p-2 border-l-2 border-l-[#00A896] bg-slate-50 rounded-r-lg"
+                  transition={{ delay: 0.4 + index * 0.1 }}
+                  className="flex items-center space-x-2 p-2 bg-white rounded border"
                 >
-                  <span>{getActivityIcon(activity.type)}</span>
-                  <span>
-                    <span className="font-medium">Claim #{activity.id}:</span>{" "}
-                    {activity.description}
-                  </span>
+                  {getActivityIcon(activity.type)}
+                  <div className="flex-1">
+                    <p className="text-xs font-medium">#{activity.id}</p>
+                    <p className="text-xs text-gray-500">
+                      {activity.description}
+                    </p>
+                  </div>
                 </motion.div>
               ))}
             </div>
