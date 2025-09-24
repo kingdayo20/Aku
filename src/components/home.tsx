@@ -173,7 +173,8 @@ const Home = () => {
     <div className="flex h-screen bg-gray-50">
       <Sidebar 
         activeSection={activeSection} 
-        onSectionChange={setActiveSection} 
+        onSectionChange={setActiveSection}
+        claimsData={claimsData}
       />
       <motion.div
         key={activeSection}
