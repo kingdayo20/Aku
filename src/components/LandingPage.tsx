@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,7 @@ const LandingPage = ({ onLogin, onSignUp }: LandingPageProps) => {
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,13 +55,14 @@ const LandingPage = ({ onLogin, onSignUp }: LandingPageProps) => {
     // Simulate successful authentication
     if (isLogin) {
       console.log("Logging in user:", email);
-      onLogin?.();
+      if (onLogin) onLogin();
     } else {
       console.log("Signing up user:", { name, email });
-      onSignUp?.();
+      if (onSignUp) onSignUp();
     }
-    
+
     setIsLoading(false);
+    navigate("/");
   };
 
   const features = [
@@ -220,6 +223,7 @@ const LandingPage = ({ onLogin, onSignUp }: LandingPageProps) => {
                         placeholder="Enter your full name"
                         className="mt-1"
                         required
+                        autoComplete="name"
                       />
                     </div>
                   )}
@@ -233,6 +237,7 @@ const LandingPage = ({ onLogin, onSignUp }: LandingPageProps) => {
                       placeholder="Enter your email"
                       className="mt-1"
                       required
+                      autoComplete="email"
                     />
                   </div>
                   <div>
@@ -245,6 +250,7 @@ const LandingPage = ({ onLogin, onSignUp }: LandingPageProps) => {
                       placeholder="Enter your password"
                       className="mt-1"
                       required
+                      autoComplete="current-password"
                     />
                   </div>
                   <Button 
