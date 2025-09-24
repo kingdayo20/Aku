@@ -65,7 +65,7 @@ const ClaimsPage = ({ claimsData }: ClaimsPageProps) => {
       return <Badge className="bg-gray-900 text-white">Paid</Badge>;
     } else if (claim.status === "pending") {
       return <Badge className="bg-gray-500 text-white">Pending</Badge>;
-    } else if (claim.classification === "Appeal" || claim.classification === "Investigate") {
+    } else if (claim.status === "denied") {
       return <Badge className="bg-red-500 text-white">Denied</Badge>;
     }
     return <Badge className="bg-gray-500 text-white">Pending</Badge>;
