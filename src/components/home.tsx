@@ -120,7 +120,7 @@ const Home = () => {
       classification: "Appeal",
       actionNeeded: "📝 Appeal with docs",
       eobSnippet: "Claim denied: Missing required documentation",
-      status: "active",
+      status: "pending",
       originalDenial: "Missing required documentation",
     },
     {
