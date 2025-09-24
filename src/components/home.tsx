@@ -181,7 +181,7 @@ const Home = () => {
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3 }}
-        className="flex-1 overflow-hidden"
+        className="flex-1 overflow-y-auto"
       >
         {renderContent()}
       </motion.div>
