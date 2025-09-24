@@ -30,7 +30,7 @@ const Home = () => {
       classification: "Appeal",
       actionNeeded: "✅ Appeal now",
       eobSnippet: "Claim denied: CPT 99213 requires prior authorization per TMHP Policy §4.2.1",
-      status: "active",
+      status: "denied",
       originalDenial: "CPT 99213 requires prior authorization",
     },
     {
@@ -45,7 +45,7 @@ const Home = () => {
       classification: "Investigate",
       actionNeeded: "⚠ Investigate",
       eobSnippet: "Claim denied: Missing coordination of benefits information required",
-      status: "pending",
+      status: "denied",
       originalDenial: "Missing coordination of benefits information",
     },
     {
@@ -60,7 +60,7 @@ const Home = () => {
       classification: "Appeal",
       actionNeeded: "📝 Draft Appeal",
       eobSnippet: "Claim denied: Authorization #TX-MED-2024-00123 expired on 03/15/2025",
-      status: "resolved",
+      status: "denied",
       originalDenial: "Prior authorization expired",
     },
     {
@@ -75,7 +75,7 @@ const Home = () => {
       classification: "Deny",
       actionNeeded: "❌ Close claim",
       eobSnippet: "Claim denied: Duplicate of claim #11982 processed on 04/02/2025",
-      status: "active",
+      status: "resolved",
       originalDenial: "Duplicate claim submission",
     },
     {
@@ -90,7 +90,7 @@ const Home = () => {
       classification: "Investigate",
       actionNeeded: "⚠ Verify eligibility",
       eobSnippet: "Claim denied: Patient not eligible for service on date of service 04/05/2025",
-      status: "pending",
+      status: "denied",
       originalDenial: "Patient eligibility verification failed",
     },
     {
