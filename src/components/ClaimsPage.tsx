@@ -35,9 +35,7 @@ const ClaimsPage = ({ claimsData }: ClaimsPageProps) => {
     if (status === "Pending") {
       filtered = filtered.filter(claim => claim.status === "pending");
     } else if (status === "Denied") {
-      filtered = filtered.filter(claim => 
-        claim.classification === "Appeal" || claim.classification === "Investigate"
-      );
+      filtered = filtered.filter(claim => claim.status === "denied");
     } else if (status === "Paid") {
       filtered = filtered.filter(claim => claim.status === "resolved");
     }
@@ -50,9 +48,12 @@ const ClaimsPage = ({ claimsData }: ClaimsPageProps) => {
     }
 
     if (searchTerm) {
+      const lowercasedTerm = searchTerm.toLowerCase();
       filtered = filtered.filter(claim =>
-        claim.id.includes(searchTerm) ||
-        claim.patient.toLowerCase().includes(searchTerm.toLowerCase())
+        claim.id.toLowerCase().includes(lowercasedTerm) ||
+        claim.patient.toLowerCase().includes(lowercasedTerm) ||
+        claim.denialReason.toLowerCase().includes(lowercasedTerm) ||
+        claim.cptCode.toLowerCase().includes(lowercasedTerm)
       );
     }
 
@@ -313,6 +314,7 @@ const ClaimsTable = ({
             <TableHead className="font-semibold">ICN</TableHead>
             <TableHead className="font-semibold">Payer</TableHead>
             <TableHead className="font-semibold">Status</TableHead>
+            <TableHead className="font-semibold">Action</TableHead>
             <TableHead className="font-semibold text-right">Amount</TableHead>
           </TableRow>
         </TableHeader>
@@ -323,12 +325,28 @@ const ClaimsTable = ({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: index * 0.05 }}
-              className="hover:bg-gray-50 cursor-pointer"
-              onClick={() => onClaimClick(claim)}
+              className="hover:bg-gray-50"
             >
-              <TableCell className="font-medium">{claim.id}</TableCell>
+              <TableCell
+                className="font-medium cursor-pointer"
+                onClick={() => onClaimClick(claim)}
+              >
+                {claim.id}
+              </TableCell>
               <TableCell>{claim.payerAdmin?.toUpperCase() || claim.payer}</TableCell>
               <TableCell>{getStatusBadge(claim)}</TableCell>
+              <TableCell>
+                <Button
+                  variant="link"
+                  className="p-0 h-auto text-blue-600"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClaimClick(claim);
+                  }}
+                >
+                  {claim.actionNeeded}
+                </Button>
+              </TableCell>
               <TableCell className="text-right font-medium">
                 ${claim.amountBilled.toFixed(2)}
               </TableCell>
