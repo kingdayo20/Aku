@@ -18,9 +18,10 @@ import { Input } from "@/components/ui/input";
 interface SidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  claimsData: any[];
 }
 
-const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
+const Sidebar = ({ activeSection, onSectionChange, claimsData }: SidebarProps) => {
   const menuItems = [
     { id: "dashboard", label: "Dashboard", icon: BarChart3 },
     { id: "analytics", label: "Analytics", icon: BarChart3 },
@@ -35,10 +36,24 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
+  // Calculate real-time stats from claims data
+  const followUpsDue = claimsData.filter(claim => 
+    claim.status === "active" && 
+    (claim.classification === "Investigate" || claim.classification === "Appeal")
+  ).length;
+  
+  const newDenials = claimsData.filter(claim => 
+    claim.classification === "Appeal" || claim.classification === "Investigate"
+  ).length;
+  
+  const appealsPending = claimsData.filter(claim => 
+    claim.classification === "Appeal" && claim.status === "active"
+  ).length;
+
   const todayStats = [
-    { label: "Follow-ups due", value: 14 },
-    { label: "New denials", value: 37 },
-    { label: "Appeals pending", value: 8 },
+    { label: "Follow-ups due", value: followUpsDue },
+    { label: "New denials", value: newDenials },
+    { label: "Appeals pending", value: appealsPending },
   ];
 
   return (
@@ -71,7 +86,7 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
               onClick={() => onSectionChange(item.id)}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium transition-colors mb-1 ${
                 activeSection === item.id
-                  ? "bg-gray-900 text-white"
+                  ? "bg-blue-600 text-white"
                   : "text-gray-700 hover:bg-gray-100"
               }`}
               whileHover={{ x: 2 }}
@@ -96,7 +111,7 @@ const Sidebar = ({ activeSection, onSectionChange }: SidebarProps) => {
           {todayStats.map((stat) => (
             <div key={stat.label} className="flex justify-between items-center text-sm">
               <span className="text-gray-600">{stat.label}</span>
-              <span className="bg-gray-900 text-white px-2 py-1 rounded text-xs font-medium">
+              <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium">
                 {stat.value}
               </span>
             </div>

@@ -29,14 +29,37 @@ const LandingPage = ({ onLogin, onSignUp }: LandingPageProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!email || !password) {
+      alert("Please fill in all required fields");
+      return;
+    }
+    
+    if (!isLogin && !name) {
+      alert("Please enter your full name");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Simulate API call delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // Simulate successful authentication
     if (isLogin) {
+      console.log("Logging in user:", email);
       onLogin?.();
     } else {
+      console.log("Signing up user:", { name, email });
       onSignUp?.();
     }
+    
+    setIsLoading(false);
   };
 
   const features = [
@@ -228,8 +251,9 @@ const LandingPage = ({ onLogin, onSignUp }: LandingPageProps) => {
                     type="submit" 
                     className="w-full bg-[#0F2C5D] hover:bg-[#0A1F47] text-white"
                     size="lg"
+                    disabled={isLoading}
                   >
-                    {isLogin ? "Sign In" : "Create Account"}
+                    {isLoading ? "Please wait..." : (isLogin ? "Sign In" : "Create Account")}
                   </Button>
                 </form>
                 

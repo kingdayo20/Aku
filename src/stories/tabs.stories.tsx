@@ -49,11 +49,11 @@ export const Base = {
         <div className="grid gap-2 py-4">
           <div className="space-y-1">
             <Label htmlFor="current">Current password</Label>
-            <Input id="current" type="password" />
+            <Input id="current" type="password" autoComplete="current-password" />
           </div>
           <div className="space-y-1">
             <Label htmlFor="new">New password</Label>
-            <Input id="new" type="password" />
+            <Input id="new" type="password" autoComplete="new-password" />
           </div>
         </div>
         <div className="flex">

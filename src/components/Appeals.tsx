@@ -66,7 +66,7 @@ const Appeals = ({ claimsData }: AppealsProps) => {
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm">Export</Button>
-            <Button className="bg-gray-900 hover:bg-gray-800 text-white" size="sm">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white" size="sm">
               Run Bot
             </Button>
           </div>
