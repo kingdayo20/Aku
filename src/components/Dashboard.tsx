@@ -4,21 +4,52 @@ import {
   Users,
   CheckCircle,
   TrendingUp,
-  BarChart,
-  PieChart,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  Tooltip,
+  Legend,
+  CartesianGrid,
+} from "recharts";
 
 const Dashboard = ({ claimsData }: { claimsData: any[] }) => {
   const totalBudget = claimsData.reduce(
     (acc, claim) => acc + claim.amountBilled,
     0
   );
-  const totalCustomers = new Set(claimsData.map((claim) => claim.patient)).size;
+  const totalCustomers = new Set(claimsData.map((claim) => claim.patient))
+    .size;
 
-  // Assuming 'resolved' status means profit
   const totalProfit = claimsData
     .filter((claim) => claim.status === "resolved")
     .reduce((acc, claim) => acc + claim.amountBilled, 0);
+
+  const weeklyData = [
+    { day: "Mon", denials: 12 },
+    { day: "Tue", denials: 18 },
+    { day: "Wed", denials: 10 },
+    { day: "Thu", denials: 23 },
+    { day: "Fri", denials: 19 },
+    { day: "Sat", denials: 8 },
+    { day: "Sun", denials: 14 },
+  ];
+
+  const payerCounts = claimsData.reduce((acc, claim) => {
+    const payer = claim.payerAdmin || claim.payer;
+    acc[payer] = (acc[payer] || 0) + 1;
+    return acc;
+  }, {} as { [key: string]: number });
+
+  const payerData = Object.entries(payerCounts).map(([payer, count]) => ({
+    payer,
+    denials: count,
+  }));
 
   return (
     <div>
@@ -32,7 +63,7 @@ const Dashboard = ({ claimsData }: { claimsData: any[] }) => {
         />
         <Card
           title="TOTAL CUSTOMERS"
-          value={`${(totalCustomers / 1000).toFixed(1)}k`}
+          value={`${totalCustomers}`}
           percentage={-16}
           icon={Users}
           variant="success"
@@ -54,21 +85,42 @@ const Dashboard = ({ claimsData }: { claimsData: any[] }) => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Sales</h3>
-          <div className="h-80 bg-gray-100 rounded-lg flex items-center justify-center">
-            <BarChart className="w-16 h-16 text-gray-400" />
-            <span className="ml-4 text-gray-500">Sales chart placeholder</span>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Weekly Denials Trend
+          </h3>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={weeklyData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="day" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="denials"
+                  stroke="#8884d8"
+                  activeDot={{ r: 8 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Traffic Source
+            Denials by Payer
           </h3>
-          <div className="h-80 bg-gray-100 rounded-lg flex items-center justify-center">
-            <PieChart className="w-16 h-16 text-gray-400" />
-            <span className="ml-4 text-gray-500">
-              Traffic source chart placeholder
-            </span>
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={payerData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="payer" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="denials" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
