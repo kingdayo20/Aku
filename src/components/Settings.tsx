@@ -7,25 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const Settings = () => {
   return (
-    <div className="flex-1 bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-            <p className="text-gray-600">SECTION</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm">Export</Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white" size="sm">
-              Run Bot
-            </Button>
-          </div>
-        </div>
-      </div>
-
+    <div className="flex-1 bg-gray-50 p-6">
       {/* Content */}
-      <div className="p-6 space-y-8">
+      <div className="space-y-8">
         {/* General Settings */}
         <Card className="bg-white">
           <CardHeader>

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import Sidebar from "@/components/Sidebar";
+import { useState } from "react";
+import Sidebar from "@/new-components/Sidebar";
+import MainContent from "@/new-components/MainContent";
 import Dashboard from "@/components/Dashboard";
 import Analytics from "@/components/Analytics";
 import ClaimsPage from "@/components/ClaimsPage";
@@ -16,7 +16,6 @@ import Settings from "@/components/Settings";
 const Home = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
 
-  // Enhanced claims data with more realistic information
   const claimsData = [
     {
       id: "2025-09-0001",
@@ -29,7 +28,8 @@ const Home = () => {
       denialReason: "CPT 99213 - No authorization",
       classification: "Appeal",
       actionNeeded: "✅ Appeal now",
-      eobSnippet: "Claim denied: CPT 99213 requires prior authorization per TMHP Policy §4.2.1",
+      eobSnippet:
+        "Claim denied: CPT 99213 requires prior authorization per TMHP Policy §4.2.1",
       status: "denied",
       originalDenial: "CPT 99213 requires prior authorization",
     },
@@ -38,13 +38,14 @@ const Home = () => {
       patient: "Sarah Johnson",
       dateOfService: "04/08/2025",
       cptCode: "99214",
-      amountBilled: 145.00,
+      amountBilled: 145.0,
       payer: "commercial",
       payerAdmin: "bcbs",
       denialReason: "Missing COB",
       classification: "Investigate",
       actionNeeded: "⚠ Investigate",
-      eobSnippet: "Claim denied: Missing coordination of benefits information required",
+      eobSnippet:
+        "Claim denied: Missing coordination of benefits information required",
       status: "denied",
       originalDenial: "Missing coordination of benefits information",
     },
@@ -53,13 +54,14 @@ const Home = () => {
       patient: "Mike Davis",
       dateOfService: "04/05/2025",
       cptCode: "99215",
-      amountBilled: 980.00,
+      amountBilled: 980.0,
       payer: "commercial",
       payerAdmin: "uhc-commercial",
       denialReason: "Prior Auth Expired",
       classification: "Appeal",
       actionNeeded: "📝 Draft Appeal",
-      eobSnippet: "Claim denied: Authorization #TX-MED-2024-00123 expired on 03/15/2025",
+      eobSnippet:
+        "Claim denied: Authorization #TX-MED-2024-00123 expired on 03/15/2025",
       status: "denied",
       originalDenial: "Prior authorization expired",
     },
@@ -83,13 +85,14 @@ const Home = () => {
       patient: "Robert Brown",
       dateOfService: "04/01/2025",
       cptCode: "99213",
-      amountBilled: 410.00,
+      amountBilled: 410.0,
       payer: "medicare",
       payerAdmin: "fiss",
       denialReason: "Patient Not Eligible",
       classification: "Investigate",
       actionNeeded: "⚠ Verify eligibility",
-      eobSnippet: "Claim denied: Patient not eligible for service on date of service 04/05/2025",
+      eobSnippet:
+        "Claim denied: Patient not eligible for service on date of service 04/05/2025",
       status: "denied",
       originalDenial: "Patient eligibility verification failed",
     },
@@ -113,7 +116,7 @@ const Home = () => {
       patient: "David Martinez",
       dateOfService: "04/15/2025",
       cptCode: "99213",
-      amountBilled: 120.10,
+      amountBilled: 120.1,
       payer: "medicaid",
       payerAdmin: "tmhp",
       denialReason: "Missing documentation",
@@ -128,7 +131,7 @@ const Home = () => {
       patient: "Jennifer Lee",
       dateOfService: "04/18/2025",
       cptCode: "99215",
-      amountBilled: 360.00,
+      amountBilled: 360.0,
       payer: "commercial",
       payerAdmin: "humana",
       denialReason: "Non-covered service",
@@ -137,7 +140,7 @@ const Home = () => {
       eobSnippet: "Claim denied: Service not covered under current plan",
       status: "pending",
       originalDenial: "Service not covered under current plan",
-    }
+    },
   ];
 
   const renderContent = () => {
@@ -170,21 +173,14 @@ const Home = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar 
-        activeSection={activeSection} 
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar
+        activeSection={activeSection}
         onSectionChange={setActiveSection}
-        claimsData={claimsData}
       />
-      <motion.div
-        key={activeSection}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.3 }}
-        className="flex-1 overflow-y-auto"
-      >
+      <MainContent title={activeSection.replace("-", " ")}>
         {renderContent()}
-      </motion.div>
+      </MainContent>
     </div>
   );
 };
