@@ -1,17 +1,13 @@
 import { useState } from "react";
-import Sidebar from "@/new-components/Sidebar";
-import MainContent from "@/new-components/MainContent";
-import Dashboard from "@/components/Dashboard";
-import Analytics from "@/components/Analytics";
-import ClaimsPage from "@/components/ClaimsPage";
-import Workqueues from "@/components/Workqueues";
-import Appeals from "@/components/Appeals";
-import Payers from "@/components/Payers";
-import Documents from "@/components/Documents";
-import Integrations from "@/components/Integrations";
-import AuditLog from "@/components/AuditLog";
-import Help from "@/components/Help";
-import Settings from "@/components/Settings";
+import Sidebar from "../new-components/Sidebar";
+import MainContent from "../new-components/MainContent";
+import Dashboard from "./Dashboard";
+import ClaimsPage from "./ClaimsPage";
+import Appeals from "./Appeals";
+import Payers from "./Payers";
+import Settings from "./Settings";
+import Customers from "./Customers";
+import Companies from "./Companies";
 
 const Home = () => {
   const [activeSection, setActiveSection] = useState("dashboard");
@@ -31,7 +27,7 @@ const Home = () => {
       eobSnippet:
         "Claim denied: CPT 99213 requires prior authorization per TMHP Policy §4.2.1",
       status: "denied",
-      originalDenial: "CPT 99213 requires prior authorization",
+      originalDenial: "Prior authorization expired",
     },
     {
       id: "2025-09-0002",
@@ -147,26 +143,18 @@ const Home = () => {
     switch (activeSection) {
       case "dashboard":
         return <Dashboard claimsData={claimsData} />;
-      case "analytics":
-        return <Analytics claimsData={claimsData} />;
       case "claims":
         return <ClaimsPage claimsData={claimsData} />;
-      case "workqueues":
-        return <Workqueues claimsData={claimsData} />;
       case "appeals":
         return <Appeals claimsData={claimsData} />;
       case "payers":
         return <Payers claimsData={claimsData} />;
-      case "documents":
-        return <Documents />;
-      case "integrations":
-        return <Integrations />;
-      case "audit-log":
-        return <AuditLog />;
-      case "help":
-        return <Help />;
       case "settings":
         return <Settings />;
+      case "customers":
+        return <Customers />;
+      case "companies":
+        return <Companies />;
       default:
         return <Dashboard claimsData={claimsData} />;
     }
